@@ -545,7 +545,7 @@ async function handleChatSubmit(e) {
             headers: {
                 "Authorization": `Bearer ${activeKey}`,
                 "HTTP-Referer": window.location.origin || "http://localhost",
-                "X-Title": "서울시 공공서비스예약 AI 도우미",
+                "X-Title": "Seoul Public Service Reservation AI Assistant",
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(requestBody)
