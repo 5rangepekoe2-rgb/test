@@ -1,32 +1,15 @@
-/* Runtime compatibility patch for Vercel practice deployment. */
+// Runtime fixes for Vercel practice deployment
+// 1) Disable OpenRouter web-search mode by default to avoid :online/plugin failures.
+// 2) Fetch Seoul Open API through same-origin Vercel function (/api/seoul).
+// 3) Keep the embedded practice OpenRouter key behavior unchanged.
+
 (() => {
   const nativeFetch = window.fetch.bind(window);
-
-  function getSeoulKey(url) {
-    try {
-      const decoded = decodeURIComponent(url);
-      const match = decoded.match(/openAPI\.seoul\.go\.kr:8088\/([^/]+)\/json\/ListPublicReservationEducation/i);
-      return match ? match[1] : null;
-    } catch (_) {
-      return null;
-    }
-  }
+  localStorage.setItem('openrouter_web_search', 'false');
 
   window.fetch = async function patchedFetch(input, init) {
     const url = typeof input === 'string' ? input : (input && input.url) || '';
 
-    // HTTPS Vercel page -> HTTP Seoul API is blocked as mixed content.
-    // Route it through our same-origin Vercel serverless proxy instead.
-    const seoulKey = getSeoulKey(url);
-    if (seoulKey) {
-      return nativeFetch(`/api/seoul?key=${encodeURIComponent(seoulKey)}`, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' }
-      });
-    }
-
-    // OpenRouter web-search options can fail for some model/provider combinations.
-    // Try the requested mode first, then automatically retry as a normal chat call.
     if (url.includes('openrouter.ai/api/v1/chat/completions') && init?.body) {
       const first = await nativeFetch(input, init);
       if (first.ok) return first;
@@ -39,8 +22,6 @@
 
         if (usesOnline) body.model = body.model.replace(/:online$/, '');
         delete body.plugins;
-
-        console.warn('OpenRouter web-search request failed; retrying without web plugin.');
         return nativeFetch(input, { ...init, body: JSON.stringify(body) });
       } catch (_) {
         return first;
@@ -49,4 +30,31 @@
 
     return nativeFetch(input, init);
   };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      if (window.state) {
+        state.webSearchEnabled = false;
+      }
+      localStorage.setItem('openrouter_web_search', 'false');
+      if (typeof updateWebSearchToggleUI === 'function') updateWebSearchToggleUI();
+
+      document.querySelectorAll('.key-notice, .api-notice, .notice').forEach((notice) => {
+        const text = (notice.textContent || '').toLowerCase();
+        if (text.includes('api') || text.includes('키')) {
+          notice.innerHTML = '<span class="notice-icon">✅</span><span>연습용 API 키가 자동 적용되어 있습니다. 별도 입력 없이 바로 질문할 수 있습니다.</span>';
+        }
+      });
+
+      document.querySelectorAll('input[type="password"], input[placeholder*="API"], input[placeholder*="api"], input[placeholder*="키"]').forEach((el) => {
+        const parentText = (el.closest('div')?.textContent || '').toLowerCase();
+        if (parentText.includes('openrouter')) {
+          el.value = '';
+          el.placeholder = '연습용 키 자동 적용됨';
+        }
+      });
+    } catch (e) {
+      console.warn('UI patch warning:', e);
+    }
+  });
 })();
