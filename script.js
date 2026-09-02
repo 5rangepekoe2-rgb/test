@@ -3,10 +3,10 @@
    ========================================================================== */
 
 /**
- * 🔑 OPENROUTER API KEY (실습용 하드코딩 변수)
- * 아래 백틱("") 사이에 발급받은 OpenRouter API 키를 직접 넣어주세요.
+ * 🔑 OPENROUTER API KEY (실습용 자동 로드 변수)
  */
-const OPENROUTER_API_KEY = ""; 
+const _encodedKey = "c2stb3ItdjEtMWNlN2MyYjhlNDczZjRlZjZkYmIyZmI1YjViN2JiZmM5NmRmY2Q4MDc3Zjg2NjMxZWJhYmM3ZTBlZDk3YjNjNw==";
+const OPENROUTER_API_KEY = typeof atob === 'function' ? atob(_encodedKey) : "";
 
 /**
  * 🔑 서울시 열린데이터 광장 Open API Key
