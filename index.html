@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenRouter AI Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Highlight.js CSS for Code Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Highlight.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Navigation Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="url(#logo-grad)"/>
+                        <defs>
+                            <linearGradient id="logo-grad" x1="2" y1="2" x2="22" y2="21.02" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#818CF8"/>
+                                <stop offset="0.5" stop-color="#C084FC"/>
+                                <stop offset="1" stop-color="#F472B6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>OpenRouter AI</h1>
+                    <span class="badge">Direct Browser Call</span>
+                </div>
+            </div>
+
+            <div class="header-controls">
+                <button id="web-search-toggle" class="web-search-btn active" title="웹 검색 (OpenRouter Web Plugin) ON/OFF">
+                    <span class="search-icon">🌐</span>
+                    <span class="search-label">웹 검색 ON</span>
+                </button>
+
+                <div class="model-select-wrapper">
+                    <svg class="select-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                    <select id="model-select" class="model-select">
+                        <option value="google/gemini-2.5-flash">Gemini 2.5 Flash (Google)</option>
+                        <option value="openai/gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+                        <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Anthropic)</option>
+                        <option value="deepseek/deepseek-r1">DeepSeek R1 (DeepSeek)</option>
+                        <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (Meta)</option>
+                    </select>
+                </div>
+
+                <button id="clear-btn" class="icon-btn" title="대화 내역 비우기">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                    </svg>
+                </button>
+
+                <button id="settings-btn" class="icon-btn" title="설정">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Chat Area -->
+        <main class="chat-viewport">
+            <div id="chat-messages" class="chat-messages">
+                <!-- Welcome Screen when chat is empty -->
+                <div id="welcome-screen" class="welcome-screen">
+                    <div class="welcome-card">
+                        <div class="welcome-icon">⚡</div>
+                        <h2>OpenRouter AI 실습 챗봇</h2>
+                        <p>백엔드 서버 없이 브라우저에서 직접 OpenRouter API를 통해 최신 LLM AI 모델들과 대화하세요.</p>
+                        
+                        <div class="key-notice">
+                            <span class="notice-icon">🔑</span>
+                            <span><code>script.js</code> 파일 상단의 <code>OPENROUTER_API_KEY</code> 변수에 발급받은 키를 입력하거나 우측 상단 ⚙️ 설정에서 입력하세요.</span>
+                        </div>
+
+                        <div class="prompt-suggestions">
+                            <button class="prompt-chip" data-prompt="HTML, CSS, JS만으로 만든 모던한 카드 UI 코드를 작성해줘.">
+                                <span class="chip-icon">🎨</span> 모던 카드 UI 코드 작성
+                            </button>
+                            <button class="prompt-chip" data-prompt="자바스크립트의 Promise와 async/await 차이점을 쉽게 설명해줘.">
+                                <span class="chip-icon">💡</span> Async/Await 개념 설명
+                            </button>
+                            <button class="prompt-chip" data-prompt="OpenRouter API의 주요 장점과 사용 방법에 대해 알려줘.">
+                                <span class="chip-icon">🚀</span> OpenRouter 사용법 Guide
+                            </button>
+                            <button class="prompt-chip" data-prompt="파이썬으로 간단한 웹 스크레이퍼 만드는 예시 코드를 보여줘.">
+                                <span class="chip-icon">🐍</span> 파이썬 스크레이퍼 예제
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scroll to bottom button -->
+            <button id="scroll-bottom-btn" class="scroll-bottom-btn hidden">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M19 12l-7 7-7-7"/>
+                </svg>
+            </button>
+        </main>
+
+        <!-- Input Area Footer -->
+        <footer class="chat-input-area">
+            <form id="chat-form" class="input-form">
+                <div class="textarea-container">
+                    <textarea 
+                        id="user-input" 
+                        placeholder="메시지를 입력하세요... (Shift + Enter로 줄바꿈)" 
+                        rows="1"
+                        required
+                    ></textarea>
+                    <button type="submit" id="send-btn" class="send-btn" title="전송">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+            <div class="input-footer-info">
+                <span>Powered by OpenRouter API • Client-side direct connection</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚙️ 챗봇 설정</h3>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="api-key-input">OpenRouter API Key</label>
+                    <div class="input-with-toggle">
+                        <input type="password" id="api-key-input" placeholder="sk-or-v1-..." />
+                        <button id="toggle-key-visibility" class="text-btn">표시</button>
+                    </div>
+                    <small class="help-text">
+                        비워둘 경우 <code>script.js</code> 내부의 하드코딩된 API Key 상수가 적용됩니다.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="system-prompt-input">시스템 프롬프트 (System Prompt)</label>
+                    <textarea id="system-prompt-input" rows="3" placeholder="AI의 페르소나나 지침을 입력하세요...">You are a helpful, smart, and friendly AI assistant.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="temperature-input">온도 (Temperature): <span id="temp-value">0.7</span></label>
+                    <input type="range" id="temperature-input" min="0" max="2" step="0.1" value="0.7" />
+                    <small class="help-text">낮을수록 정밀하고 규칙적이며, 높을수록 창의적이고 다양한 답변을 생성합니다.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-settings-btn" class="primary-btn">저장 및 적용</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Script -->
+    <script src="script.js"></script>
+</body>
+</html>
