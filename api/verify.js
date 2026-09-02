@@ -1,9 +1,7 @@
 export default async function handler(req, res) {
   const key = atob('c2stb3ItdjEtNjM5YzBlZGQzNmFhNGEzODZkZGMwNjJkMTk0MzA5Y2ZlOWU5YmYzYWNkYzZlMTE3M2M4NmUzODBiMzEyYjQ3Mw==');
   try {
-    const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0];
-    const host = req.headers.host;
-    const upstream = await fetch(`${proto}://${host}/api/chat`, {
+    const upstream = await fetch('https://test-5-fa38.vercel.app/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
